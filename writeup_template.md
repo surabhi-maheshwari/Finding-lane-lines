@@ -1,18 +1,12 @@
 
 # **Finding Lane Lines on the Road** 
 
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file. But feel free to use some other method and submit a pdf if you prefer.
 
 ---
 
 **Finding Lane Lines on the Road**
 
-The goals / steps of this project are the following:
-* Make a pipeline that finds lane lines on the road
-* Reflect on your work in a written report
-
+The motive of the project is to find lanes on image and then use the image to find lanes on the video. I have used Python and OpenCV to find lanes on images and videos. 
 
 [//]: # (Image References)
 
@@ -91,8 +85,11 @@ i. Save this image in the test_images_output folder and apply the same procedure
 ### 2. Identify potential shortcomings with your current pipeline
 
 A possible shortcoming to the current pipeline is it wont properly work on sharp turns. It is designed for straight roads and wont be able to detect curvy/sharp turns easily.
+
 Another shortcoming can be that the current approach has al the hard coded parameters, so it might not work where the region of interest is out of these hard coded values. It might also not work on up-hill or down-hill roads where the region or interest might change. 
+
 Another shortcoming can be that if there is any object in between the two lanes, this process wont be able to identify it. 
+
 Also, if the color of the lanes is not within the thresholds, the lanes wont be detected and thus the current pipeline may fail.
 
 
