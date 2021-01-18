@@ -1,56 +1,103 @@
+
 # **Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-<img src="examples/laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
 
-Overview
 ---
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+**Finding Lane Lines on the Road**
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+The motive of the project is to find lanes on image and then use the image to find lanes on the video. I have used Python and OpenCV to find lanes on images and videos. 
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
+[//]: # (Image References)
 
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
-
-
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
-
-1. Describe the pipeline
-
-2. Identify any shortcomings
-
-3. Suggest possible improvements
-
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+[image1]: ./examples/import.jpg "Import"
+[image2]: ./examples/gaussian.jpg "Gaussian"
+[image3]: ./examples/color_threshold.jpg "Color Threshold"
+[image4]: ./examples/canny.jpg "Canny"
+[image5]: ./examples/region_of_interest.jpg "Region of Interest"
+[image6]: ./examples/hough_transform.jpg "Hough Transform"
+[image7]: ./examples/draw_lines.jpg "Draw Lines"
+[image8]: ./examples/final.jpg "Final"
 
 
-The Project
+
 ---
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+### Reflection
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/83ec35ee-1e02-48a5-bdb7-d244bd47c2dc/lessons/8c82408b-a217-4d09-b81d-1bda4c6380ef/concepts/4f1870e0-3849-43e4-b670-12e6f2d4b7a7) if you haven't already.
+### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-**Step 2:** Open the code in a Jupyter Notebook
+My pipeline consisted of following steps:
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
+a. Import the images from test_images folder and read the images using imread function of matplotlib.image library
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
+![alt text][image1]
 
-`> jupyter notebook`
+b. Apply the gaussian blur on the image to blur the image based on the kernel size. 
 
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
+![alt text][image2]
 
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
+c. Apply the color threshold to the image. The final image has pixels which are greater than a threshold and the pixels below the threshold are blacked out. In the below image, only the lane is seen, everything else is blacked out.
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+![alt text][image3]
+
+d. Apply Canny edge detection technique to find the edges of the lane lines in the image with low_threshold = 50 and high_threshold = 150
+
+![alt text][image4]
+
+e. Find the region of interest by providing the vertices of the area to be taken into consideration. For this case, the vertices were (0,image.shape[0]),(430, 300), (500, 300), (900, image.shape[0]) which creates a quadrilateral around the lanes of interest. Thus, it just gives the image within this region, and blacks out everything else. 
+image.shape[0]) = 540
+
+![alt text][image5]
+
+f. Apply the Hough transform to the above picture with rho = 1, theta = np.pi/180, threshold = 30, min_line_len = 30, max_line_gap = 20
+
+![alt text][image6]
+
+g. Change the draw_lines function to average and extrapolate the line for left lane. 
+
+For extrapolating the dotted lane, following steps are taken: 
+
+i. Find the slope(m) for each line(2 points) and find intercept with that slope
+
+ii. Check if slope is negative or positive. If the slope is negative, check if the slope is greater than -0.8 or less than -0.2, continue to the next line since the slope is too less or too high and the points are threshold.
+
+iii. Similarly, for right line, the slope should be position and if the slope is less than 0.2 or the slope is greater than 0.8, the line is skewed and can be treated as the threshold.
+
+iv. If the line is not a threshold, append the slope and intercept to either left or right values depending on slope.
+
+v. Set y_max as image.shape[0] (540) which is the max value of y axis on the image and y_min to 330 which can be treated as the upper threshold limit of y value on the image.
+
+vi. If the left or right slopes exits, find mean of slopes and intercepts for each line and find the left and right x values using the y = mx+c formula and correspomding values calculated in the above steps.
+
+vii. Now the new averaged and extrapolated coordinates have been created.
+
+viii. Create the corresponding line for the extrapolated coordinates.
+
+![alt text][image7]
+
+h. Call the weighted image function which will apply apply the extrapolated lane image on the original images generating the following final image.
+
+![alt text][image8]
+
+i. Save this image in the test_images_output folder and apply the same procedure for all the other images in the test_images directory.
+
+### 2. Identify potential shortcomings with your current pipeline
+
+A possible shortcoming to the current pipeline is it wont properly work on sharp turns. It is designed for straight roads and wont be able to detect curvy/sharp turns easily.
+
+Another shortcoming can be that the current approach has al the hard coded parameters, so it might not work where the region of interest is out of these hard coded values. It might also not work on up-hill or down-hill roads where the region or interest might change. 
+
+Another shortcoming can be that if there is any object in between the two lanes, this process wont be able to identify it. 
+
+Also, if the color of the lanes is not within the thresholds, the lanes wont be detected and thus the current pipeline may fail.
+
+
+### 3. Suggest possible improvements to your pipeline
+
+The possible improvement may be to include the algorithm to work for curves/sharp turns. To do so, the x and y values can be calculated from the equation of curves instead of y = mx + c
+
+Another improvement can be to use flexible region of interest based on the type of road.
+
+Another improvement can be to have multiple cameras at different positions in the car to find right region of interest for each test case and go ahead accordingly
 
